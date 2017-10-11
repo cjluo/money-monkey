@@ -1,0 +1,4 @@
+alpha_vantage
+enum34
+pandas
+sqlalchemy
