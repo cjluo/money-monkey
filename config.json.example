@@ -1,4 +1,5 @@
 {
   "ALPHA_VANTAGE_KEY": "demo",
-  "DB_PATH": "/tmp/test.db"
+  "DB_PATH": "/tmp/test.db",
+  "LOG_PATH": "/tmp/monkey.log"
 }
