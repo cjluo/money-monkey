@@ -4,6 +4,8 @@ import logging
 
 from stock_dao import StockDao
 from alpha_vantage_api_service import AlphaVantageApiService
+from inference import Inference
+from data_processor import DataProcessor
 
 
 def main():
@@ -12,6 +14,7 @@ def main():
     parser.add_argument("-s", "--symbol", help="symbols separated by ,")
     parser.add_argument("-m", "--model", help="model, specify daily or latest")
     parser.add_argument("-n", "--n", help="data size of the ml model")
+    parser.add_argument("-a", "--movavg", help="movavg size")
     args = parser.parse_args()
 
     symbols = args.symbol.split(',')
@@ -19,6 +22,7 @@ def main():
         logging.error("No symbols specified")
         return
     n = int(args.n)
+    movavg = int(args.movavg)
 
     with open(args.config) as config_file:
         config = json.load(config_file)
@@ -30,13 +34,15 @@ def main():
 
         dao = StockDao(config['DB_PATH'])
         api_service = AlphaVantageApiService(config['ALPHA_VANTAGE_KEY'])
+        inference = Inference(config['HOST'], config['WORK_DIR'])
+        data_processor = DataProcessor(movavg)
 
         for symbol in symbols:
             if args.model == 'latest':
                 models = api_service.get_latest(symbol)
                 # Reversed order
                 prev_models = dao.load_data(
-                    symbol, models[-1].timestamp.date(), n - 1)
+                    symbol, models[-1].timestamp.date(), n + movavg - 2)
                 close = []
                 for prev_model in prev_models:
                     close.append(prev_model.close)
@@ -44,7 +50,7 @@ def main():
 
             elif args.model == 'daily':
                 models = api_service.get_daily(symbol)
-                prev_models = models[-n:]
+                prev_models = models[-(n + movavg - 1):]
                 close = []
                 for prev_model in prev_models:
                     close.append(prev_model.close)
@@ -52,12 +58,15 @@ def main():
             else:
                 logging.error("No model specified")
             logging.info("%s: %d entries added", symbol, len(models))
-            print close
             if len(models) == 0:
                 logging.error("No models added")
                 return
             logging.info("first entry: %s", models[0])
             logging.info("last entry: %s", models[-1])
+
+            data = data_processor.get_relative_movavg(close)
+            result = inference.do_inference(data)
+
             dao.save_data(models)
 
 

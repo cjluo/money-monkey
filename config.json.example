@@ -1,5 +1,7 @@
 {
   "ALPHA_VANTAGE_KEY": "demo",
   "DB_PATH": "/tmp/test.db",
-  "LOG_PATH": "/tmp/monkey.log"
+  "LOG_PATH": "/tmp/monkey.log",
+  "HOST": "localhost:9000",
+  "WORK_DIR": "/tmp"
 }
