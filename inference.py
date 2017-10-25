@@ -54,7 +54,7 @@ class Inference:
         request.model_spec.signature_name = 'output'
 
         request.inputs['x'].CopyFrom(
-            tf.contrib.util.make_tensor_proto(data, shape=[1, len(data)]))
+            tf.contrib.util.make_tensor_proto(data, shape=data.shape))
 
         result_future = stub.Predict.future(request, 5.0)  # 5 seconds
         result_future.add_done_callback(_callback)

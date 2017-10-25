@@ -43,17 +43,20 @@ def main():
                 # Reversed order
                 prev_models = dao.load_data(
                     symbol, models[-1].timestamp.date(), n + movavg - 2)
-                close = []
+                prev_close = []
+                last_close = []
                 for prev_model in prev_models:
-                    close.append(prev_model.close)
-                close.append(models[-1].close)
+                    prev_close.append(prev_model.close)
+                for model in models:
+                    last_close.append(model.close)
 
             elif args.model == 'daily':
                 models = api_service.get_daily(symbol)
                 prev_models = models[-(n + movavg - 1):]
-                close = []
-                for prev_model in prev_models:
-                    close.append(prev_model.close)
+                prev_close = []
+                for prev_model in prev_models[:-1]:
+                    prev_close.append(prev_model.close)
+                last_close = [models[-1].close]
 
             else:
                 logging.error("No model specified")
@@ -64,8 +67,11 @@ def main():
             logging.info("first entry: %s", models[0])
             logging.info("last entry: %s", models[-1])
 
-            data = data_processor.get_relative_movavg(close)
+            data = data_processor.get_relative_movavg(prev_close, last_close)
             result = inference.do_inference(data)
+
+            print data
+            print result
 
             dao.save_data(models)
 

@@ -10,7 +10,7 @@ class StockModelDaily(Base):
     high = Column(Float)
     low = Column(Float)
     close = Column(Float)
-    volume= Column(Integer)
+    volume = Column(Integer)
 
     def __init__(self, symbol, timestamp, open, high, low, close, volume):
         self.symbol = symbol
