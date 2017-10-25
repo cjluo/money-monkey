@@ -41,7 +41,7 @@ def main():
             if args.model == 'latest':
                 models = api_service.get_latest(symbol)
                 # Reversed order
-                prev_models = dao.load_data(
+                prev_models = dao.load_daily_data(
                     symbol, models[-1].timestamp.date(), n + movavg - 2)
                 prev_close = []
                 last_close = []
@@ -67,11 +67,18 @@ def main():
             logging.info("first entry: %s", models[0])
             logging.info("last entry: %s", models[-1])
 
-            data = data_processor.get_relative_movavg(prev_close, last_close)
-            result = inference.do_inference(data)
+            if len(prev_close) == (n + movavg - 2):
+                data = data_processor.get_relative_movavg(
+                    prev_close, last_close)
+                result = inference.do_inference(data)
 
-            print data
-            print result
+                if len(result) == 1:
+                    models[-1].score = result[0]
+                else:
+                    for i in range(len(result)):
+                        models[i].score = result[i]
+            else:
+                logging.error("Does not have enough history for inference")
 
             dao.save_data(models)
 

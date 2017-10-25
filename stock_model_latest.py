@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
-from stock_data_saver import Base
+from base import Base
+
 
 class StockModelLatest(Base):
     __tablename__ = 'stock_latest'
@@ -10,7 +11,8 @@ class StockModelLatest(Base):
     high = Column(Float)
     low = Column(Float)
     close = Column(Float)
-    volume= Column(Integer)
+    volume = Column(Integer)
+    score = Column(Float)
 
     def __init__(self, symbol, timestamp, open, high, low, close, volume):
         self.symbol = symbol
@@ -20,7 +22,8 @@ class StockModelLatest(Base):
         self.low = low
         self.close = close
         self.volume = volume
+        self.score = 0
 
     def __repr__(self):
-        return "<Stock(symbol='%s', timestamp='%s', open='%s', high='%s', low='%s', close='%s', volume='%s')>" % (
-            self.symbol, self.timestamp, self.open, self.high, self.low, self.close, self.volume)
+        return "<Stock(symbol='%s', timestamp='%s', open='%s', high='%s', low='%s', close='%s', volume='%s', score='%s')>" % (
+            self.symbol, self.timestamp, self.open, self.high, self.low, self.close, self.volume, self.score)

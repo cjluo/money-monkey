@@ -1,10 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from base import Base
 
 from stock_model_daily import StockModelDaily
-
-Base = declarative_base()
 
 
 class StockDao:
@@ -16,12 +14,12 @@ class StockDao:
     def save_data(self, models):
         session = self._session()
         for model in models:
-            if not session.query(model.__class__).get(
-                    (model.symbol, model.timestamp)):
+            if not session.query(
+                    model.__class__).get((model.symbol, model.timestamp)):
                 session.add(model)
         session.commit()
 
-    def load_data(self, symbol, timestamp, n):
+    def load_daily_data(self, symbol, timestamp, n):
         session = self._session()
         data = session.query(StockModelDaily).filter(
             StockModelDaily.symbol == symbol).filter(
