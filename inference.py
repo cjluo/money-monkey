@@ -39,8 +39,9 @@ class Inference:
             if exception:
                 logger.error(exception)
             else:
-                logger.info("score %s", np.array(
-                    result_future.result().outputs['score'].double_val))
+                score = np.array(
+                    result_future.result().outputs['score'].double_val)
+                logger.info("score %s (first), %s (last)", score[0], score[-1])
             with self._condition:
                 self._condition.notify()
 

@@ -1,11 +1,13 @@
 import argparse
 import json
 import logging
+import numpy as np
 
 from stock_dao import StockDao
 from alpha_vantage_api_service import AlphaVantageApiService
 from inference import Inference
 from data_processor import DataProcessor
+from model_presenter import plot_to_file
 
 
 def main():
@@ -15,6 +17,8 @@ def main():
     parser.add_argument("-m", "--model", help="model, specify daily or latest")
     parser.add_argument("-n", "--n", help="data size of the ml model")
     parser.add_argument("-a", "--movavg", help="movavg size")
+    parser.add_argument(
+        "-t", "--threshold", help="abs value of score notification")
     args = parser.parse_args()
 
     symbols = args.symbol.split(',')
@@ -23,6 +27,7 @@ def main():
         return
     n = int(args.n)
     movavg = int(args.movavg)
+    threshold = float(args.threshold)
 
     with open(args.config) as config_file:
         config = json.load(config_file)
@@ -75,8 +80,18 @@ def main():
                 if len(result) == 1:
                     models[-1].score = result[0]
                 else:
+                    timestamp = []
                     for i in range(len(result)):
                         models[i].score = result[i]
+                        timestamp.append(models[i].timestamp)
+                    # Todo check the score range for today and
+                    # see if we want to send out email.
+                    score_max = np.absolute(result).max()
+                    if score_max >= threshold:
+                        plot_file = plot_to_file(
+                            symbol, timestamp, last_close, result)
+                        logging.info(
+                            "%s save prediction to %s", symbol, plot_file)
             else:
                 logging.error("Does not have enough history for inference")
 
