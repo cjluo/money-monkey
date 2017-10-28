@@ -3,5 +3,6 @@
   "DB_PATH": "/tmp/test.db",
   "LOG_PATH": "/tmp/monkey.log",
   "HOST": "localhost:9000",
-  "WORK_DIR": "/tmp"
+  "WORK_DIR": "/tmp",
+  "EMAIL": "dest@example.com"
 }

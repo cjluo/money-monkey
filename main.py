@@ -7,6 +7,7 @@ from alpha_vantage_api_service import AlphaVantageApiService
 from inference import Inference
 from data_processor import DataProcessor
 from model_presenter import plot_to_file
+from email_sender import EmailSender
 
 
 def main():
@@ -14,10 +15,15 @@ def main():
     parser.add_argument("-c", "--config", help="config file path")
     parser.add_argument("-s", "--symbol", help="symbols separated by ,")
     parser.add_argument("-m", "--model", help="model, specify daily or latest")
-    parser.add_argument("-n", "--n", help="data size of the ml model")
-    parser.add_argument("-a", "--movavg", help="movavg size")
     parser.add_argument(
-        "-t", "--threshold", help="abs value of score notification")
+        "-n", "--n", help="data size of the ml model", default=15)
+    parser.add_argument("-a", "--movavg", help="movavg size", default=30)
+    parser.add_argument(
+        "-t", "--threshold", help="abs value of score notification",
+        default=0.4)
+    parser.add_argument(
+        "-i", "--incremental", help="incremental score for new notification",
+        default=0.05)
     args = parser.parse_args()
 
     symbols = args.symbol.split(',')
@@ -27,6 +33,7 @@ def main():
     n = int(args.n)
     movavg = int(args.movavg)
     threshold = float(args.threshold)
+    incremental = float(args.incremental)
 
     with open(args.config) as config_file:
         config = json.load(config_file)
@@ -40,6 +47,9 @@ def main():
         api_service = AlphaVantageApiService(config['ALPHA_VANTAGE_KEY'])
         inference = Inference(config['HOST'], config['WORK_DIR'])
         data_processor = DataProcessor(movavg)
+        email_sender = EmailSender(config['EMAIL'])
+        title = ''
+        images = {}
 
         for symbol in symbols:
             if args.model == 'latest':
@@ -93,10 +103,10 @@ def main():
 
                     is_new_score = (
                         daily_score_max is None) or (
-                        score_max >= daily_score_max + 0.5)
+                        score_max >= daily_score_max + incremental)
                     is_new_score |= (
                         daily_score_min is None) or (
-                        score_min <= daily_score_min - 0.5)
+                        score_min <= daily_score_min - incremental)
 
                     logging.info("score_max %s, score_min %s",
                                  score_max, score_min)
@@ -111,10 +121,15 @@ def main():
                             symbol, timestamp, last_close, result)
                         logging.info(
                             "%s save prediction to %s", symbol, plot_file)
+                        title += "%s:%0.2f, " % (symbol, result[-1])
+                        images[symbol] = plot_file
             else:
                 logging.error("Does not have enough history for inference")
 
             dao.save_data(models)
+
+        if images:
+            email_sender.send_email(title, images)
 
 
 if __name__ == "__main__":

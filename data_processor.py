@@ -7,7 +7,7 @@ class DataProcessor:
         self._movavg = movavg
 
     def get_relative_movavg(self, close, last_close):
-        # close: n - 1 np array
+        # close: np array or previous daily closes
         # last_close: m np array
         # Returns m x n np array
 
