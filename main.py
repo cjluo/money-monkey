@@ -1,7 +1,6 @@
 import argparse
 import json
 import logging
-import numpy as np
 
 from stock_dao import StockDao
 from alpha_vantage_api_service import AlphaVantageApiService
@@ -86,8 +85,28 @@ def main():
                         timestamp.append(models[i].timestamp)
                     # Todo check the score range for today and
                     # see if we want to send out email.
-                    score_max = np.absolute(result).max()
-                    if score_max >= threshold:
+                    score_max = result.max()
+                    score_min = result.min()
+
+                    daily_score_min, daily_score_max =\
+                        dao.load_latest_score_limit(symbol, timestamp[0])
+
+                    is_new_score = (
+                        daily_score_max is None) or (
+                        score_max >= daily_score_max + 0.5)
+                    is_new_score |= (
+                        daily_score_min is None) or (
+                        score_min <= daily_score_min - 0.5)
+
+                    logging.info("score_max %s, score_min %s",
+                                 score_max, score_min)
+                    logging.info("daily_score_max %s, daily_score_min %s",
+                                 daily_score_max, daily_score_min)
+
+                    meet_threshold = (score_max >= threshold)
+                    meet_threshold |= (score_min <= -threshold)
+
+                    if is_new_score and meet_threshold:
                         plot_file = plot_to_file(
                             symbol, timestamp, last_close, result)
                         logging.info(

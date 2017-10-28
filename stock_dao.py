@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine
+from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 from base import Base
+from datetime import datetime
 
 from stock_model_daily import StockModelDaily
+from stock_model_latest import StockModelLatest
 
 
 class StockDao:
@@ -26,3 +29,14 @@ class StockDao:
             StockModelDaily.timestamp < timestamp).order_by(
             StockModelDaily.timestamp.desc()).limit(n).all()
         return reversed(data)
+
+    def load_latest_score_limit(self, symbol, timestamp):
+        timestamp = datetime.combine(timestamp.date(), datetime.min.time())
+        session = self._session()
+        max = session.query(func.max(StockModelLatest.score)).filter(
+            StockModelLatest.symbol == symbol).filter(
+            StockModelLatest.timestamp >= timestamp).scalar()
+        min = session.query(func.min(StockModelLatest.score)).filter(
+            StockModelLatest.symbol == symbol).filter(
+            StockModelLatest.timestamp >= timestamp).scalar()
+        return min, max
