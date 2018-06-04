@@ -12,11 +12,11 @@ class DataType(Enum):
 
 def data_to_model(data, symbol, type):
     timestamp = data.index.values
-    open = data['open'].values
-    high = data['high'].values
-    low = data['low'].values
-    close = data['close'].values
-    volume = data['volume'].values
+    open = data['1. open'].values
+    high = data['2. high'].values
+    low = data['3. low'].values
+    close = data['4. close'].values
+    volume = data['5. volume'].values
     models = []
     for i in range(len(timestamp)):
         if type == DataType.MINUTE:
