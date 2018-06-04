@@ -1,3 +1,7 @@
+import matplotlib
+# Do not use X for plotting
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import FormatStrFormatter
