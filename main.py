@@ -8,6 +8,7 @@ from inference import Inference
 from data_processor import DataProcessor
 from model_presenter import plot_to_file
 from email_sender import EmailSender
+from time import sleep
 
 
 def main():
@@ -127,6 +128,8 @@ def main():
                 logging.error("Does not have enough history for inference")
 
             dao.save_data(models)
+            # Sleep 2s to meet API querying limit.
+            sleep(2)
 
         if images:
             email_sender.send_email(title, images)
