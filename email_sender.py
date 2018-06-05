@@ -1,5 +1,6 @@
 import os
 import smtplib
+import logging
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
@@ -12,6 +13,7 @@ class EmailSender:
     def send_email(self, title, image_pairs, delete=True):
         from_address = 'monkey@luckyserver.com'
         to_address = self._address
+
         msg = MIMEMultipart('related')
         msg['Subject'] = title
         msg['From'] = from_address
@@ -34,9 +36,15 @@ class EmailSender:
         text = MIMEText(text, 'html')
         msg_alt.attach(text)
 
+        logger = logging.getLogger()
         s = smtplib.SMTP('localhost')
-        s.sendmail(from_address, to_address, msg.as_string())
-        s.quit()
+        try:
+            s.sendmail(from_address, to_address, msg.as_string())
+            logger.info("mail sent, subject %s" % title)
+        except Exception as exception:
+            logger.error("mail failed %s" % str(exception))
+        finally:
+            s.quit()
 
         if delete:
             for symbol in image_pairs:
