@@ -14,7 +14,6 @@ from time import sleep
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="config file path")
-    parser.add_argument("-s", "--symbol", help="symbols separated by ,")
     parser.add_argument("-m", "--model", help="model, specify daily or latest")
     parser.add_argument(
         "-n", "--n", help="data size of the ml model", default=15)
@@ -27,10 +26,6 @@ def main():
         default=0.05)
     args = parser.parse_args()
 
-    symbols = args.symbol.split(',')
-    if len(symbols) == 0:
-        logging.error("No symbols specified")
-        return
     n = int(args.n)
     movavg = int(args.movavg)
     threshold = float(args.threshold)
@@ -42,7 +37,6 @@ def main():
                             format='%(asctime)s %(levelname)s %(message)s', )
         logging.info("DB_PATH: %s, ALPHA_VANTAGE_KEY: %s",
                      config['DB_PATH'], config['ALPHA_VANTAGE_KEY'])
-        logging.info("Symbol %s", str(symbols))
 
         dao = StockDao(config['DB_PATH'])
         api_service = AlphaVantageApiService(config['ALPHA_VANTAGE_KEY'])
@@ -51,6 +45,13 @@ def main():
         email_sender = EmailSender(config['EMAIL'])
         title = ''
         images = {}
+
+        symbols = config['STOCK'].split(',')
+        logging.info("Symbol %s", str(symbols))
+
+        if len(symbols) == 0:
+            logging.error("No symbols specified")
+            return
 
         for symbol in symbols:
             if args.model == 'latest':

@@ -4,5 +4,6 @@
   "LOG_PATH": "/tmp/monkey.log",
   "HOST": "localhost:9000",
   "WORK_DIR": "/tmp",
-  "EMAIL": "dest@example.com"
+  "EMAIL": "dest@example.com",
+  "STOCK": "AAPL,YY,GM,TWTR"
 }
