@@ -39,7 +39,7 @@ class EmailSender:
         logger = logging.getLogger()
         s = smtplib.SMTP('localhost')
         try:
-            s.sendmail(from_address, to_address, msg.as_string())
+            s.sendmail(from_address, to_address.split(','), msg.as_string())
             logger.info("mail sent, subject %s" % title)
         except Exception as exception:
             logger.error("mail failed %s" % str(exception))
