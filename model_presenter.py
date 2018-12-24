@@ -23,13 +23,13 @@ def plot_to_file(symbol, timestamp, close, score):
     h2, l2 = ax2.get_legend_handles_labels()
     ax1.legend(h1 + h2, l1 + l2)
 
-    png_file = NamedTemporaryFile(delete=False, suffix='.png')
-    png_file.close()
+    jpg_file = NamedTemporaryFile(delete=False, suffix='.jpg')
+    jpg_file.close()
 
     fig.set_dpi(100)
     fig.set_size_inches(10, 4)
     fig.set_tight_layout(True)
 
-    fig.savefig(png_file.name)
+    fig.savefig(jpg_file.name, quality=50)
     plt.close(fig)
-    return png_file.name
+    return jpg_file.name
