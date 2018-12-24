@@ -4,3 +4,4 @@ pandas
 sqlalchemy
 matplotlib
 tensorflow-serving-api
+pillow
