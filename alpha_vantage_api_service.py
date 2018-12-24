@@ -1,10 +1,12 @@
 from datetime import datetime
 from enum import Enum
+import logging
 
 from alpha_vantage.timeseries import TimeSeries
 from stock_api_service import StockApiService
 from stock_model_latest import StockModelLatest
 from stock_model_daily import StockModelDaily
+
 
 class DataType(Enum):
     MINUTE = 1
@@ -30,15 +32,23 @@ def data_to_model(data, symbol, type):
 
 class AlphaVantageApiService(StockApiService):
     def __init__(self, alpha_vantage_key):
-        self._alpha_vantage_key = alpha_vantage_key
+        self._ts = TimeSeries(key=alpha_vantage_key, output_format='pandas', retries=3)
 
     def get_latest(self, symbol):
-        ts = TimeSeries(key=self._alpha_vantage_key, output_format='pandas')
-        data, _ = ts.get_intraday(symbol, interval='1min', outputsize='compact')
-        return data_to_model(data, symbol, DataType.MINUTE)
+        try:
+            data, _ = self._ts.get_intraday(symbol, interval='1min', outputsize='compact')
+            return data_to_model(data, symbol, DataType.MINUTE)
+        except Exception as e:
+            logger = logging.getLogger()
+            logger.error(str(e))
+            return None
 
     def get_daily(self, symbol):
-        ts = TimeSeries(key=self._alpha_vantage_key, output_format='pandas')
-        data, _ = ts.get_daily(symbol, outputsize='compact')
-        timestamp = data.index.values
-        return data_to_model(data, symbol, DataType.DAY)
+        try:
+            data, _ = self._ts.get_daily(symbol, outputsize='compact')
+            timestamp = data.index.values
+            return data_to_model(data, symbol, DataType.DAY)
+        except Exception as e:
+            logger = logging.getLogger()
+            logger.error(str(e))
+            return None
