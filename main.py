@@ -140,10 +140,11 @@ def main():
                         logging.info("daily_score_max %s, daily_score_min %s",
                                      daily_score_max, daily_score_min)
 
-                        meet_threshold = (score_max >= threshold)
-                        meet_threshold |= (score_min <= -threshold)
+                        # meet_threshold = (score_max >= threshold)
+                        # meet_threshold |= (score_min <= -threshold)
 
-                        if is_new_score and meet_threshold:
+                        # if is_new_score and meet_threshold:
+                        if is_new_score:
                             plot_file = plot_to_file(
                                 symbol, timestamp, last_close, result)
                             logging.info(
