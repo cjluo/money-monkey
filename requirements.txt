@@ -1,7 +1,3 @@
-alpha_vantage
-enum34
+alpha-vantage
 pandas
 sqlalchemy
-matplotlib
-tensorflow-serving-api
-pillow
